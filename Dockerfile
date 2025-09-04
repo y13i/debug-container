@@ -8,7 +8,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt -y update && \
   apt -y upgrade && \
-  apt -y install apt-transport-https ca-certificates curl dnsutils git gnupg htop iputils-ping jq less mandoc mysql-client net-tools openssh-client postgresql-client redis-tools screen sl sudo tzdata unzip vim zip && \
+  apt -y install apt-transport-https ca-certificates curl dnsutils git gnupg htop iputils-ping jq less mandoc mysql-client net-tools openssh-client postgresql-client redis-tools screen sl snapd sudo tzdata unzip vim zip && \
   apt -y clean
 
 # Install Deno
@@ -21,10 +21,7 @@ COPY --from=terraform /bin/terraform /usr/bin/terraform
 COPY --from=valkey /usr/local/bin/valkey-cli /usr/bin/valkey-cli
 
 # Install AWS CLI
-RUN curl -sL https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip -o /tmp/awscliv2.zip && \
-  unzip /tmp/awscliv2.zip -d /tmp && \
-  /tmp/aws/install && \
-  rm -rf /tmp/aws /tmp/awscliv2.zip && \
+RUN snap install aws-cli --classic && \
   aws --version
 
 # Install Google Cloud SDK
