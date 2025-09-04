@@ -1,6 +1,10 @@
-FROM denoland/deno:2.4.5 as deno
-FROM hashicorp/terraform:1.13.1 as terraform
-FROM valkey/valkey:8.1.3 as valkey
+FROM --platform=$BUILDPLATFORM denoland/deno:2.4.5 as deno
+FROM --platform=$BUILDPLATFORM hashicorp/terraform:1.13.1 as terraform
+FROM --platform=$BUILDPLATFORM valkey/valkey:8.1.3 as valkey
+
+ARG TARGETPLATFORM
+ARG BUILDPLATFORM
+RUN echo "I am running on $BUILDPLATFORM, building for $TARGETPLATFORM"
 
 FROM public.ecr.aws/lts/ubuntu:24.04_stable
 
@@ -8,7 +12,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt -y update && \
   apt -y upgrade && \
-  apt -y install apt-transport-https ca-certificates curl dnsutils git gnupg htop iputils-ping jq less mandoc mysql-client net-tools openssh-client postgresql-client redis-tools screen sl snapd sudo tzdata unzip vim zip && \
+  apt -y install apt-transport-https ca-certificates curl dnsutils git gnupg htop iputils-ping jq less mandoc mysql-client net-tools openssh-client postgresql-client redis-tools screen sl sudo tzdata unzip vim zip && \
   apt -y clean
 
 # Install Deno
@@ -21,7 +25,16 @@ COPY --from=terraform /bin/terraform /usr/bin/terraform
 COPY --from=valkey /usr/local/bin/valkey-cli /usr/bin/valkey-cli
 
 # Install AWS CLI
-RUN snap install aws-cli --classic && \
+RUN case "$BUILDPLATFORM" in \
+  "linux/arm64") export AWSCLI_ARCH="aarch64" ;; \
+  *) export AWSCLI_ARCH="x86_64" ;; \
+  esac && \
+  echo "AWSCLI_ARCH=$AWSCLI_ARCH" >> /etc/environment
+ENV AWSCLI_ARCH=${AWSCLI_ARCH}
+RUN curl -sL https://awscli.amazonaws.com/awscli-exe-linux-${AWSCLI_ARCH}.zip -o /tmp/awscliv2.zip && \
+  unzip /tmp/awscliv2.zip -d /tmp && \
+  /tmp/aws/install && \
+  rm -rf /tmp/aws /tmp/awscliv2.zip && \
   aws --version
 
 # Install Google Cloud SDK
