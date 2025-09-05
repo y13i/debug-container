@@ -1,6 +1,6 @@
-FROM --platform=$TARGETPLATFORM denoland/deno:2.4.5 AS deno
-FROM --platform=$TARGETPLATFORM hashicorp/terraform:1.13.1 AS terraform
-FROM --platform=$TARGETPLATFORM valkey/valkey:8.1.3 AS valkey
+FROM denoland/deno:2.4.5 AS deno
+FROM hashicorp/terraform:1.13.1 AS terraform
+FROM valkey/valkey:8.1.3 AS valkey
 
 FROM public.ecr.aws/lts/ubuntu:24.04_stable AS main
 
@@ -84,7 +84,7 @@ RUN case "${TARGETPLATFORM}" in \
   "linux/amd64") AWSCLI_ARCH="x86_64" ;; \
   esac && \
   curl -L "https://awscli.amazonaws.com/awscli-exe-linux-${AWSCLI_ARCH}.zip" -o "/tmp/awscliv2.zip" && \
-  unzip "/tmp/awscliv2.zip" -qq -d /tmp && \
+  unzip "/tmp/awscliv2.zip" -q -d /tmp && \
   /tmp/aws/install && \
   rm -rf "/tmp/aws" "/tmp/awscliv2.zip" && \
   aws --version
