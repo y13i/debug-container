@@ -84,7 +84,7 @@ RUN case "${TARGETPLATFORM}" in \
   "linux/amd64") AWSCLI_ARCH="x86_64" ;; \
   esac && \
   curl -L "https://awscli.amazonaws.com/awscli-exe-linux-${AWSCLI_ARCH}.zip" -o "/tmp/awscliv2.zip" && \
-  unzip "/tmp/awscliv2.zip" -q -d /tmp && \
+  unzip -q "/tmp/awscliv2.zip" -d /tmp && \
   /tmp/aws/install && \
   rm -rf "/tmp/aws" "/tmp/awscliv2.zip" && \
   aws --version
