@@ -1,6 +1,6 @@
-FROM --platform=$BUILDPLATFORM denoland/deno:2.4.5 AS deno
-FROM --platform=$BUILDPLATFORM hashicorp/terraform:1.13.1 AS terraform
-FROM --platform=$BUILDPLATFORM valkey/valkey:8.1.3 AS valkey
+FROM --platform=$TARGETPLATFORM denoland/deno:2.4.5 AS deno
+FROM --platform=$TARGETPLATFORM hashicorp/terraform:1.13.1 AS terraform
+FROM --platform=$TARGETPLATFORM valkey/valkey:8.1.3 AS valkey
 
 FROM public.ecr.aws/lts/ubuntu:24.04_stable AS main
 
