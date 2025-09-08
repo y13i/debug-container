@@ -1,6 +1,7 @@
 FROM denoland/deno:2.4.5 AS deno
 FROM hashicorp/terraform:1.13.1 AS terraform
 FROM valkey/valkey:8.1.3 AS valkey
+FROM ghcr.io/mccutchen/go-httpbin:2.18.3 AS go-httpbin
 
 FROM public.ecr.aws/lts/ubuntu:24.04_stable AS main
 
@@ -76,6 +77,9 @@ RUN terraform -version
 # Install valkey-cli
 COPY --from=valkey /usr/local/bin/valkey-cli /usr/bin/valkey-cli
 RUN valkey-cli --version
+
+# Install go-httpbin
+COPY --from=go-httpbin /bin/go-httpbin /usr/bin/go-httpbin
 
 # Install AWS CLI
 ARG AWSCLI_ARCH
