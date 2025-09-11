@@ -139,9 +139,7 @@ WORKDIR /home/me
 
 # Install Linuxbrew
 RUN /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" && \
-  echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> /home/me/.zshrc && \
-  eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)" && \
-  brew --version
+  /home/linuxbrew/.linuxbrew/bin/brew --version
 
 # Install using Linuxbrew
 RUN /home/linuxbrew/.linuxbrew/bin/brew install \
