@@ -15,24 +15,35 @@ RUN apt -y update && \
   apt -y upgrade && \
   apt -y install \
   apt-transport-https \
+  bat \
+  build-essential \
   ca-certificates \
   curl \
   dnsutils \
+  eza \
+  fd-find \
+  file \
+  fzf \
   git \
+  git-delta \
   gnupg \
   htop \
+  hyperfine \
   iperf3 \
   iproute2 \
   iputils-ping \
   jq \
   less \
+  lnav \
   mandoc \
   mysql-client \
   net-tools \
   netcat-openbsd \
   openssh-client \
   postgresql-client \
+  procps \
   redis-tools \
+  ripgrep \
   screen \
   sl \
   strace \
@@ -40,31 +51,43 @@ RUN apt -y update && \
   tzdata \
   unzip \
   vim \
-  zip && \
+  zip \
+  zoxide \
+  zsh && \
   apt -y clean && \
   ln -s /usr/games/sl /usr/bin/sl && \
+  batcat --version && \
   curl --version && \
   dig -v && \
+  delta --version && \
+  eza --version && \
+  fdfind --version && \
+  fzf --version && \
   nslookup -version && \
   git --version && \
   htop --version && \
+  hyperfine --version && \
   iperf3 --version && \
   ip -V && \
   ping -V && \
   jq --version && \
   less --version && \
+  lnav --version && \
   mysql --version && \
   ifconfig -V && \
   nc -h && \
   ssh -V && \
   psql --version && \
   redis-cli --version && \
+  rg --version && \
   screen --version && \
   strace --version && \
   sudo --version && \
   unzip -v && \
   vim --version && \
-  zip -v
+  zip -v && \
+  zoxide --version && \
+  zsh --version
 
 # Install Deno
 COPY --from=deno /usr/bin/deno /usr/bin/deno
@@ -99,3 +122,36 @@ RUN curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | gpg --dearmor -
   apt -y update && apt -y install google-cloud-cli && \
   apt -y clean && \
   gcloud --version
+
+# Install kubectl
+RUN curl -L "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/${TARGETPLATFORM}/kubectl" -o /usr/bin/kubectl && \
+  chmod +x /usr/bin/kubectl && \
+  kubectl version --client
+
+# Create non-root user
+RUN useradd -m -s /bin/zsh -G sudo me && \
+  echo 'me ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers && \
+  chsh -s /bin/zsh me
+
+# Switch to non-root user
+USER me
+WORKDIR /home/me
+
+# Install Linuxbrew
+RUN /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" && \
+  echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> /home/me/.zshrc && \
+  eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)" && \
+  brew --version
+
+# Install using Linuxbrew
+RUN /home/linuxbrew/.linuxbrew/bin/brew install \
+  kubectx \
+  derailed/k9s/k9s && \
+  /home/linuxbrew/.linuxbrew/bin/k9s version
+
+# Setup zsh
+RUN git clone https://github.com/y13i/.zsh.git /home/me/.zsh && \
+  chmod +x /home/me/.zsh/install.sh && \
+  /home/me/.zsh/install.sh
+
+CMD ["/bin/zsh"]
