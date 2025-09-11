@@ -128,6 +128,22 @@ RUN curl -L "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/st
   chmod +x /usr/bin/kubectl && \
   kubectl version --client
 
+# Install K9s
+ARG K9S_ARCH
+RUN case "${TARGETPLATFORM}" in \
+  "linux/arm64") K9S_ARCH="linux_arm64" ;; \
+  "linux/amd64") K9S_ARCH="linux_amd64" ;; \
+  esac && \
+  curl -L "https://github.com/derailed/k9s/releases/download/v0.50.9/k9s_${K9S_ARCH}.deb" -o "/tmp/k9s.deb" && \
+  dpkg -i /tmp/k9s.deb && \
+  rm -rf /tmp/k9s.deb && \
+  k9s version
+
+# Install kubectx
+RUN git clone https://github.com/ahmetb/kubectx /opt/kubectx && \
+  ln -s /opt/kubectx/kubectx /usr/bin/kubectx && \
+  ln -s /opt/kubectx/kubens /usr/bin/kubens
+
 # Create non-root user
 RUN useradd -m -s /bin/zsh -G sudo me && \
   echo 'me ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers && \
@@ -137,19 +153,13 @@ RUN useradd -m -s /bin/zsh -G sudo me && \
 USER me
 WORKDIR /home/me
 
-# Install Linuxbrew
-RUN /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" && \
-  /home/linuxbrew/.linuxbrew/bin/brew --version
-
-# Install using Linuxbrew
-RUN /home/linuxbrew/.linuxbrew/bin/brew install \
-  kubectx \
-  derailed/k9s/k9s && \
-  /home/linuxbrew/.linuxbrew/bin/k9s version
-
 # Setup zsh
 RUN git clone https://github.com/y13i/.zsh.git /home/me/.zsh && \
   chmod +x /home/me/.zsh/install.sh && \
   /home/me/.zsh/install.sh
+RUN mkdir -p ~/.oh-my-zsh/custom/completions && \
+  chmod -R 755 ~/.oh-my-zsh/custom/completions && \
+  ln -s /opt/kubectx/completion/_kubectx.zsh ~/.oh-my-zsh/custom/completions/_kubectx.zsh && \
+  ln -s /opt/kubectx/completion/_kubens.zsh ~/.oh-my-zsh/custom/completions/_kubens.zsh
 
 CMD ["/bin/zsh"]
