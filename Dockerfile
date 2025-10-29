@@ -1,5 +1,5 @@
 FROM denoland/deno:2.5.5 AS deno
-FROM hashicorp/terraform:1.13.1 AS terraform
+FROM hashicorp/terraform:1.13.4 AS terraform
 FROM valkey/valkey:9.0.0 AS valkey
 FROM ghcr.io/mccutchen/go-httpbin:2.18.3 AS go-httpbin
 
