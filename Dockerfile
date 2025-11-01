@@ -1,7 +1,7 @@
 FROM denoland/deno:2.5.5 AS deno
 FROM hashicorp/terraform:1.13.4 AS terraform
 FROM valkey/valkey:9.0.0 AS valkey
-FROM ghcr.io/mccutchen/go-httpbin:2.18.3 AS go-httpbin
+FROM ghcr.io/mccutchen/go-httpbin:2.19.0 AS go-httpbin
 
 FROM public.ecr.aws/lts/ubuntu:24.04_stable AS main
 
